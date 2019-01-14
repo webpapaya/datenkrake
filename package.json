@@ -4,12 +4,24 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "mocha $(find . -name '*.specs.js' -not -path './node_modules/*')"
+    "test": "mocha --compilers js:@babel/register $(find . -name '*.spec.js' -not -path './node_modules/*')"
   },
   "author": "Thomas Mayrhofer",
   "license": "ISC",
   "devDependencies": {
+    "@babel/cli": "^7.2.3",
+    "@babel/core": "^7.2.2",
+    "@babel/node": "^7.2.2",
+    "@babel/preset-env": "^7.2.3",
+    "@babel/register": "^7.0.0",
     "hamjest": "^3.2.1",
     "mocha": "^5.2.0"
+  },
+  "dependencies": {
+    "axios": "^0.18.0",
+    "camelcase-keys-deep": "^0.1.0",
+    "decamelize": "^2.0.0",
+    "decamelize-keys-deep": "^0.1.1",
+    "ramda": "^0.26.1"
   }
 }
