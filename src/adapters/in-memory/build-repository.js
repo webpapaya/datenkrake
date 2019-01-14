@@ -1,5 +1,10 @@
 import { filterByQuery } from '../../selectors';
 
+const promisify = (object) => Object.keys(object).reduce((result, key) => {
+	result[key] = (...args) => Promise.resolve(object[key](...args))
+	return result;
+}, {});
+
 const buildRepository = ({ resource }) => {
 	const persist = (connection, records) => {
 		connection[resource] = records; // eslint-disable-line no-param-reassign
@@ -38,13 +43,13 @@ const buildRepository = ({ resource }) => {
 
 	const count = (connection, query) => where(connection, query).length;
 
-	return {
+	return promisify({
 		count,
 		where,
 		create,
 		destroy,
 		update,
-	};
+	});
 };
 
 export default buildRepository;
