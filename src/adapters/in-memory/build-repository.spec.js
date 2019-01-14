@@ -41,6 +41,8 @@ describe('where', async () => {
 				equalTo([records[0]]));
 		});
 
+		
+
 		it('works with not filter', async () => {
 			assertThat(await repository.where(connection, q(where({ property: not(eq(1)) }))),
 				negate(hasItem(records[0])));
