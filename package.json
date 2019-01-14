@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --compilers js:@babel/register $(find . -name '*.spec.js' -not -path './node_modules/*')"
+    "test": "docker-compose up -d && mocha --compilers js:@babel/register $(find . -name '*.spec.js' -not -path './node_modules/*')"
   },
   "author": "Thomas Mayrhofer",
   "license": "ISC",
@@ -14,6 +14,7 @@
     "@babel/node": "^7.2.2",
     "@babel/preset-env": "^7.2.3",
     "@babel/register": "^7.0.0",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
     "hamjest": "^3.2.1",
     "mocha": "^5.2.0"
   },
@@ -22,6 +23,7 @@
     "camelcase-keys-deep": "^0.1.0",
     "decamelize": "^2.0.0",
     "decamelize-keys-deep": "^0.1.1",
+    "pg": "^7.8.0",
     "ramda": "^0.26.1"
   }
 }
