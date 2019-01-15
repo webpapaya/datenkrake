@@ -1,22 +1,34 @@
 const OPERATORS = {
-    eq: '=',
-    lt: '<',
-    lte: '<=',
-    gt: '>',
-    gte: '>='
+    eq: (property, value) =>  `${property} = ${value}`,
+    lt: (property, value) => `${property} < ${value}`,
+    lte: (property, value) => `${property} <= ${value}`,
+    gt: (property, value) => `${property} > ${value}`,
+    gte: (property, value) => `${property} >= ${value}`,
+    oneOf: (property, values) => `${property} IN (${values.join(',')})`,
+    like: (property, value) => `${property} like '${value}'`
+}
+
+const toSqlString = (property, definition) => {
+    const operator = OPERATORS[definition.operator];
+    return operator(property, definition.value);
+}
+
+const definitionToStatement = (result, property, where) => {
+    const definition = where[property];
+
+    if (definition.operator === 'not') {
+        result.push(`NOT (${toSqlString(property, definition.value)})`)
+    } else {
+        result.push(toSqlString(property, definition))
+    }
+
+    return result;
 }
 
 const queryToSql = (query = {}) => {
     const where = query.where || {};
     const sqlWhereClause = Object.keys(where).reduce((result, property) => {
-        const definition = where[property];
-        const operator = OPERATORS[definition.operator];
-
-        if (operator) {
-            result.push(`${property} ${operator} ${definition.value}`)
-        }
-
-        return result;
+        return definitionToStatement(result, property, where);
     }, []);
 
     return sqlWhereClause.length > 0 

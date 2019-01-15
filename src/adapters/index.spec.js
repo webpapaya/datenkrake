@@ -112,98 +112,109 @@ const assertDifference = async (fn, countFn, difference) => {
                 assertThat(removedRecords, hasItem(records[0]));
             }));
         });
+
+        describe('where', async () => {
+            const records = [
+                { text: 'abc', property: 1 },
+                { text: 'def', property: 2 },
+                { text: 'ghi', property: null },
+            ];
+        
+            describe('filters', () => {
+                it('returns all records without a filter', t(async ({ connection }) => {
+                    await setupRecords(connection, records);
+                    assertThat(await repository.where(connection), equalTo(records));
+                }));
+        
+                it('works with eq filter', t(async ({ connection }) => {
+                    await setupRecords(connection, records);
+                    assertThat(await repository.where(connection, q(where({ property: eq(1) }))),
+                        equalTo([records[0]]));
+                }));
+        
+                it('works with not filter', t(async ({ connection }) => {
+                    await setupRecords(connection, records);
+                    assertThat(await repository.where(connection, q(where({ property: not(eq(1)) }))),
+                        negate(hasItem(records[0])));
+                }));
+        
+                it('works with gt filter', t(async ({ connection }) => {
+                    await setupRecords(connection, records);
+                    assertThat(await repository.where(connection, q(where({ property: gt(1) }))),
+                        negate(hasItem(records[0])));
+                }));
+        
+                it('works with gte filter', t(async ({ connection }) => {
+                    await setupRecords(connection, records);
+                    assertThat(await repository.where(connection, q(where({ property: gte(2) }))),
+                        negate(hasItem(records[0])));
+                }));
+        
+                it('works with lt filter', t(async ({ connection }) => {
+                    await setupRecords(connection, records);
+                    assertThat(await repository.where(connection, q(where({ property: lt(2) }))),
+                        hasItem(records[0]));
+                }));
+        
+                it('works with lte filter', t(async ({ connection }) => {
+                    await setupRecords(connection, records);
+                    assertThat(await repository.where(connection, q(where({ property: lte(1) }))),
+                        hasItem(records[0]));
+                }));
+        
+                it('works with oneOf filter', t(async ({ connection }) => {
+                    await setupRecords(connection, records);
+                    assertThat(await repository.where(connection, q(where({ property: oneOf(1, 2) }))),
+                        hasItems(records[0], records[1]));
+                }));
+        
+                it('works with like filter', t(async ({ connection }) => {
+                    await setupRecords(connection, records);
+                    assertThat(await repository.where(connection, q(where({ text: like('%b%') }))),
+                        hasItems(records[0]));
+                }));
+            });
+        
+            // describe('order', () => {
+            //     describe('asc', async () => {
+            //         it('nulls are last by default', async () => {
+            //             assertThat(await repository.where(connection, q(order(asc('property')))),
+            //                 contains(records[0], records[1], records[2]));
+            //         });
+        
+            //         it('with nulls first option', async () => {
+            //             assertThat(await repository.where(connection, q(order(asc('property', { nulls: 'first' })))),
+            //                 contains(records[2], records[0], records[1]));
+            //         });
+        
+            //         it('with nulls nulls last option', async () => {
+            //             assertThat(await repository.where(connection, q(order(asc('property', { nulls: 'last' })))),
+            //                 contains(records[0], records[1], records[2]));
+            //         });
+            //     });
+        
+            //     describe('desc', () => {
+            //         it('nulls are first by default', async () => {
+            //             assertThat(await repository.where(connection, q(order(desc('property')))),
+            //                 contains(records[1], records[0], records[2]));
+            //         });
+        
+            //         it('with nulls first option', async () => {
+            //             assertThat(await repository.where(connection, q(order(desc('property', { nulls: 'first' })))),
+            //                 contains(records[2], records[1], records[0]));
+            //         });
+        
+            //         it('with nulls nulls last option', async () => {
+            //             assertThat(await repository.where(connection, q(order(desc('property', { nulls: 'last' })))),
+            //                 contains(records[1], records[0], records[2]));
+            //         });
+            //     });
+            // });
+        });
     });
 });
 
-// describe('where', async () => {
 
-// 	const connection = { user: records };
-// 	const repository = buildRepository({ resource: 'user' });
-
-// 	describe('filters', () => {
-// 		it('returns all records without a filter', async () => {
-// 			assertThat(await repository.where(connection), equalTo(records));
-// 		});
-
-// 		it('works with eq filter', async () => {
-// 			assertThat(await repository.where(connection, q(where({ property: eq(1) }))),
-// 				equalTo([records[0]]));
-// 		});
-
-		
-
-// 		it('works with not filter', async () => {
-// 			assertThat(await repository.where(connection, q(where({ property: not(eq(1)) }))),
-// 				negate(hasItem(records[0])));
-// 		});
-
-// 		it('works with gt filter', async () => {
-// 			assertThat(await repository.where(connection, q(where({ property: gt(1) }))),
-// 				negate(hasItem(records[0])));
-// 		});
-
-// 		it('works with gte filter', async () => {
-// 			assertThat(await repository.where(connection, q(where({ property: gte(2) }))),
-// 				negate(hasItem(records[0])));
-// 		});
-
-// 		it('works with lt filter', async () => {
-// 			assertThat(await repository.where(connection, q(where({ property: lt(2) }))),
-// 				hasItem(records[0]));
-// 		});
-
-// 		it('works with lte filter', async () => {
-// 			assertThat(await repository.where(connection, q(where({ property: lte(1) }))),
-// 				hasItem(records[0]));
-// 		});
-
-// 		it('works with oneOf filter', async () => {
-// 			assertThat(await repository.where(connection, q(where({ property: oneOf(1, 2) }))),
-// 				hasItems(records[0], records[1]));
-// 		});
-
-// 		it('works with like filter', async () => {
-// 			assertThat(await repository.where(connection, q(where({ text: like('%b%') }))),
-// 				hasItems(records[0]));
-// 		});
-// 	});
-
-// 	describe('order', () => {
-// 		describe('asc', async () => {
-// 			it('nulls are last by default', async () => {
-// 				assertThat(await repository.where(connection, q(order(asc('property')))),
-// 					contains(records[0], records[1], records[2]));
-// 			});
-
-// 			it('with nulls first option', async () => {
-// 				assertThat(await repository.where(connection, q(order(asc('property', { nulls: 'first' })))),
-// 					contains(records[2], records[0], records[1]));
-// 			});
-
-// 			it('with nulls nulls last option', async () => {
-// 				assertThat(await repository.where(connection, q(order(asc('property', { nulls: 'last' })))),
-// 					contains(records[0], records[1], records[2]));
-// 			});
-// 		});
-
-// 		describe('desc', () => {
-// 			it('nulls are first by default', async () => {
-// 				assertThat(await repository.where(connection, q(order(desc('property')))),
-// 					contains(records[1], records[0], records[2]));
-// 			});
-
-// 			it('with nulls first option', async () => {
-// 				assertThat(await repository.where(connection, q(order(desc('property', { nulls: 'first' })))),
-// 					contains(records[2], records[1], records[0]));
-// 			});
-
-// 			it('with nulls nulls last option', async () => {
-// 				assertThat(await repository.where(connection, q(order(desc('property', { nulls: 'last' })))),
-// 					contains(records[1], records[0], records[2]));
-// 			});
-// 		});
-// 	});
-// });
 
 
 
