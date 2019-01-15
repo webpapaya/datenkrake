@@ -2111,6 +2111,11 @@ process-nextick-args@~2.0.0:
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-2.0.0.tgz#a37d732f4271b4ab1ad070d35508e8290788ffaa"
   integrity sha512-MtEC1TqN0EU5nephaJ4rAtThHtC86dNN9qCuEhtshvpVBkAW5ZO7BASN9REnF9eoXGcRub+pFuKEpOHE+HbEMw==
 
+promise-frites@^0.10.0:
+  version "0.10.0"
+  resolved "https://registry.yarnpkg.com/promise-frites/-/promise-frites-0.10.0.tgz#b691c150c02fc9bfaa4f9c841035710e6d593db7"
+  integrity sha1-tpHBUMAvyb+qT5yEEDVxDm1ZPbc=
+
 ramda@^0.26.1:
   version "0.26.1"
   resolved "https://registry.yarnpkg.com/ramda/-/ramda-0.26.1.tgz#8d41351eb8111c55353617fc3bbffad8e4d35d06"

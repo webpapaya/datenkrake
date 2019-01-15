@@ -11,7 +11,7 @@ const buildRepository = ({ resource }) => {
 	};
 
 	const where = (connection, query) => {
-		const records = connection[resource];
+		const records = connection[resource] || [];
 		return filterByQuery(query, records);
 	};
 
@@ -22,7 +22,7 @@ const buildRepository = ({ resource }) => {
 	};
 
 	const create = (connection, record) => {
-		persist(connection, [...connection[resource], record]);
+		persist(connection, [...(connection[resource] || []), record]);
 		return record;
 	};
 

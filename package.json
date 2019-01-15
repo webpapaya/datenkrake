@@ -24,6 +24,7 @@
     "decamelize": "^2.0.0",
     "decamelize-keys-deep": "^0.1.1",
     "pg": "^7.8.0",
+    "promise-frites": "^0.10.0",
     "ramda": "^0.26.1"
   }
 }

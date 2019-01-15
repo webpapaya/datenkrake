@@ -27,7 +27,6 @@ const queryToSql = (query = {}) => {
 
 export const buildRepository = ({ resource }) => {
     const where = (connection, filter = {}) => {
-        queryToSql(filter)
         const query = {
             text: `
                 SELECT * FROM ${resource}
@@ -53,11 +52,12 @@ export const buildRepository = ({ resource }) => {
             .then(result => result.rows[0]);
     }
 
-    const count = (connection) => {
+    const count = (connection, filter) => {
         const query = {
             text: `
                 SELECT count(*) as count 
-                FROM ${resource} 
+                FROM ${resource}
+                ${queryToSql(filter)};
             `,
         };
 
@@ -65,9 +65,27 @@ export const buildRepository = ({ resource }) => {
             .then((result) => parseInt(result.rows[0].count, 10));
     }
 
+    const destroy = (connection, filter) => {
+        const query = {
+            text: `
+                DELETE 
+                FROM ${resource}
+                ${queryToSql(filter)}
+                RETURNING *;
+            `,
+        };
+
+        return connection.query(query)
+            .then(result => result.rows);
+    }
+
     return { 
         where,
         count,
-        create
+        create,
+        destroy,
     }
 }
+
+export { buildConnection, releaseConnection } from './connection';
+export { default as withinTransaction } from './within-transaction'; 
