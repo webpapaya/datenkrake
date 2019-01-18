@@ -175,41 +175,47 @@ const assertDifference = async (fn, countFn, difference) => {
                 }));
             });
         
-            // describe('order', () => {
-            //     describe('asc', async () => {
-            //         it('nulls are last by default', async () => {
-            //             assertThat(await repository.where(connection, q(order(asc('property')))),
-            //                 contains(records[0], records[1], records[2]));
-            //         });
+            describe('order', () => {
+                describe('asc', () => {
+                    it('nulls are last by default', t(async ({ connection }) => {
+                        await setupRecords(connection, records);
+                        assertThat(await repository.where(connection, q(order(asc('property')))),
+                            contains(records[0], records[1], records[2]));
+                    }));
         
-            //         it('with nulls first option', async () => {
-            //             assertThat(await repository.where(connection, q(order(asc('property', { nulls: 'first' })))),
-            //                 contains(records[2], records[0], records[1]));
-            //         });
+                    it('with nulls first option', t(async ({ connection }) => {
+                        await setupRecords(connection, records);
+                        assertThat(await repository.where(connection, q(order(asc('property', { nulls: 'first' })))),
+                            contains(records[2], records[0], records[1]));
+                    }));
         
-            //         it('with nulls nulls last option', async () => {
-            //             assertThat(await repository.where(connection, q(order(asc('property', { nulls: 'last' })))),
-            //                 contains(records[0], records[1], records[2]));
-            //         });
-            //     });
+                    it('with nulls nulls last option', t(async ({ connection }) => {
+                        await setupRecords(connection, records);
+                        assertThat(await repository.where(connection, q(order(asc('property', { nulls: 'last' })))),
+                            contains(records[0], records[1], records[2]));
+                    }));
+                });
         
-            //     describe('desc', () => {
-            //         it('nulls are first by default', async () => {
-            //             assertThat(await repository.where(connection, q(order(desc('property')))),
-            //                 contains(records[1], records[0], records[2]));
-            //         });
+                describe('desc', () => {
+                    it('nulls are first by default', t(async ({ connection }) => {
+                        await setupRecords(connection, records);
+                        assertThat(await repository.where(connection, q(order(desc('property')))),
+                            contains(records[1], records[0], records[2]));
+                    }));
         
-            //         it('with nulls first option', async () => {
-            //             assertThat(await repository.where(connection, q(order(desc('property', { nulls: 'first' })))),
-            //                 contains(records[2], records[1], records[0]));
-            //         });
+                    it('with nulls first option', t(async ({ connection }) => {
+                        await setupRecords(connection, records);
+                        assertThat(await repository.where(connection, q(order(desc('property', { nulls: 'first' })))),
+                            contains(records[2], records[1], records[0]));
+                    }));
         
-            //         it('with nulls nulls last option', async () => {
-            //             assertThat(await repository.where(connection, q(order(desc('property', { nulls: 'last' })))),
-            //                 contains(records[1], records[0], records[2]));
-            //         });
-            //     });
-            // });
+                    it('with nulls nulls last option', t(async ({ connection }) => {
+                        await setupRecords(connection, records);
+                        assertThat(await repository.where(connection, q(order(desc('property', { nulls: 'last' })))),
+                            contains(records[1], records[0], records[2]));
+                    }));
+                });
+            });
         });
     });
 });

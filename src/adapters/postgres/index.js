@@ -1,3 +1,4 @@
+import { isEmpty } from 'ramda'
 const OPERATORS = {
     eq: (property, value) =>  `${property} = ${value}`,
     lt: (property, value) => `${property} < ${value}`,
@@ -30,19 +31,39 @@ const queryToSql = (query = {}) => {
     const sqlWhereClause = Object.keys(where).reduce((result, property) => {
         return definitionToStatement(result, property, where);
     }, []);
-
+    
     return sqlWhereClause.length > 0 
         ? `WHERE ${sqlWhereClause.join(' AND ')}`
         : '';
 }
 
 
+const extractDirection = ({ operator }) =>
+    operator === 'desc' ? 'DESC' : 'ASC';
+
+const extractNulls = ({ options }) =>
+    options.nulls === 'first' ? 'NULLS FIRST' : 'NULLS LAST';
+
+const orderToSql = (query = {}) => {
+    const order = query.order || [];
+    const orderStatement = order.map(({ operator, value, options }) => {
+        const direction = extractDirection({ operator });
+        const nulls = extractNulls({ options });
+        return `${value} ${direction} ${nulls}`;
+    }).join(', ');
+
+    return isEmpty(orderStatement) ? '' : `ORDER BY ${orderStatement}`; 
+}
+
+
 export const buildRepository = ({ resource }) => {
     const where = (connection, filter = {}) => {
+        
         const query = {
             text: `
                 SELECT * FROM ${resource}
-                ${queryToSql(filter)};
+                 ${queryToSql(filter)}
+                 ${orderToSql(filter)};
             `,
         };
 
