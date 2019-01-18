@@ -21,10 +21,12 @@
   "dependencies": {
     "axios": "^0.18.0",
     "camelcase-keys-deep": "^0.1.0",
+    "common-tags": "^1.8.0",
     "decamelize": "^2.0.0",
     "decamelize-keys-deep": "^0.1.1",
     "pg": "^7.8.0",
     "promise-frites": "^0.10.0",
-    "ramda": "^0.26.1"
+    "ramda": "^0.26.1",
+    "sqlstring": "^2.3.1"
   }
 }
