@@ -29,7 +29,7 @@ const assertDifference = async (fn, countFn, difference) => {
         );
     `) },
 ].forEach(({ name, adapter, setup }) => {
-    describe.only(name, () => {
+    describe(name, () => {
         const { buildRepository, withinTransaction } = adapter;
         const repository = buildRepository({ resource: 'users' });
         const t = (fn) => () => withinTransaction(async ({ connection, rollback }) => {
