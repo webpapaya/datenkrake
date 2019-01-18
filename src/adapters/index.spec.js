@@ -113,6 +113,37 @@ const assertDifference = async (fn, countFn, difference) => {
             }));
         });
 
+        describe('update', () => {
+            const records = [
+                { text: 'abc', property: 1 },
+                { text: 'def', property: 2 },
+                { text: 'ghi', property: null },
+            ];
+        
+            it('does NOT change the record count', t(async ({ connection }) => {
+                await setupRecords(connection, records);
+                await assertDifference(
+                    () => repository.update(connection, q(where({ property: eq(1) }))),
+                    () => repository.count(connection),
+                    0,
+                );
+            }));
+        
+            it('changes updates all values without query given', t(async ({ connection }) => {
+                await setupRecords(connection, records);
+                const updatedRecords = await repository.update(connection, null, { text: 'updated' });
+                assertThat(updatedRecords, everyItem(hasProperty('text', 'updated')));
+            }));
+        
+            it('with query given updates only updates filtered values', t(async ({ connection }) => {
+                await setupRecords(connection, records);
+                await repository.update(connection, q(where({ property: eq(1) })), { text: 'updated' });
+        
+                assertThat(await repository.where(connection, q(where({ property: not(eq(1)) }))),
+                    everyItem(negate(hasProperty('text', 'updated'))));
+            }));
+        });
+
         describe('where', async () => {
             const records = [
                 { text: 'abc', property: 1 },
@@ -225,34 +256,4 @@ const assertDifference = async (fn, countFn, difference) => {
 
 
 
-// describe('update', () => {
-// 	const records = [
-// 		{ text: 'abc', property: 1 },
-// 		{ text: 'def', property: 2 },
-// 		{ text: 'ghi', property: null },
-// 	];
-// 	const repository = buildRepository({ resource: 'user' });
 
-// 	it('does NOT change the record count', async () => {
-// 		const connection = { user: records };
-// 		await assertDifference(
-// 			() => repository.update(connection, q(where({ property: eq(1) }))),
-// 			() => repository.count(connection),
-// 			0,
-// 		);
-// 	});
-
-// 	it('changes updates all values without query given', async () => {
-// 		const connection = { user: records };
-// 		const updatedRecords = await repository.update(connection, null, { text: 'updated' });
-// 		assertThat(updatedRecords, everyItem(hasProperty('text', 'updated')));
-// 	});
-
-// 	it('with query given updates only updates filtered values', async () => {
-// 		const connection = { user: records };
-// 		await repository.update(connection, q(where({ property: eq(1) })), { text: 'updated' });
-
-// 		assertThat(await repository.where(connection, q(where({ property: not(eq(1)) }))),
-// 			everyItem(negate(hasProperty('text', 'updated'))));
-// 	});
-// });

@@ -26,8 +26,8 @@ const definitionToStatement = (result, property, where) => {
     return result;
 }
 
-const queryToSql = (query = {}) => {
-    const where = query.where || {};
+const queryToSql = (query) => {
+    const where = (query || {}).where || {};
     const sqlWhereClause = Object.keys(where).reduce((result, property) => {
         return definitionToStatement(result, property, where);
     }, []);
@@ -98,6 +98,23 @@ export const buildRepository = ({ resource }) => {
             .then((result) => parseInt(result.rows[0].count, 10));
     }
 
+    const update = (connection, filter, record = {}) => {
+        if (Object.keys(record).length === 0) return where(connection, filter);
+        const query = {
+            text: `
+                UPDATE ${resource}
+                SET ${Object.keys(record).map((key,index) => `${key}=$${index+1}`).join(', ')}
+                ${queryToSql(filter)}
+                RETURNING *;
+            `,
+            values: Object.values(record),
+        };
+
+        return connection.query(query)
+            .then(result => result.rows);
+
+    }
+
     const destroy = (connection, filter) => {
         const query = {
             text: `
@@ -113,6 +130,7 @@ export const buildRepository = ({ resource }) => {
     }
 
     return { 
+        update,
         where,
         count,
         create,
