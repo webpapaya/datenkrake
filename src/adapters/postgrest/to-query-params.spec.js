@@ -51,9 +51,6 @@ describe('buildQueryParamsForWhere', () => {
 		{ object: { prop: eq(1) }, queryParam: 'prop=eq.1' },
 		{ object: { prop: eq(null) }, queryParam: 'prop=is.null' },
 		{ object: { camelCase: eq(1) }, queryParam: 'camel_case=eq.1' },
-		{ object: { prop: eq(1) }, queryParam: 'prop=eq.1' },
-		{ object: { prop: eq(null) }, queryParam: 'prop=is.null' },
-		{ object: { camelCase: eq(1) }, queryParam: 'camel_case=eq.1' },
 
 		{ object: { prop: oneOf() }, queryParam: 'prop=in.()' },
 		{ object: { prop: oneOf(1, 2, 3) }, queryParam: 'prop=in.(1,2,3)' },

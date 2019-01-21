@@ -18,7 +18,7 @@ import {
 	isNil,
 } from 'ramda';
 
-const FILTERS = {
+export const FILTERS = {
 	eq: rEquals,
 	gt: rGt,
 	gte: rGte,

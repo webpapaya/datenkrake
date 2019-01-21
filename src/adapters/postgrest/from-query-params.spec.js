@@ -1,46 +1,8 @@
 import { assertThat, equalTo } from 'hamjest';
-import { q, where, limit, order, asc, desc, offset } from '../../index';
-import camelcase from 'camelcase';
-import qs from 'qs';
+import { q, where, limit, order, asc, desc, offset, eq, gt, gte, lt, lte, oneOf } from '../../index';
+import fromQueryParams from './from-query-params';
 
-const parseOrderOptions = (options) => {
-    if (options === 'nullsfirst') { return { nulls: 'first' }; }
-    else if (options === 'nullslast') { return { nulls: 'last' }; }
-    return {};
-}
-
-const parseOrder = (orderParams) => {
-    if (!orderParams) { return; }
-    const operators = orderParams.split(',').map((orderParam) => {
-        const [ property, direction, options ] = orderParam.split('.');
-        const ops = parseOrderOptions(options);
-        return direction === 'desc'
-            ? desc(camelcase(property), ops)
-            : asc(camelcase(property), ops)
-
-    });
-    return order(...operators);
-}
-
-const parseLimit = (queryParam) => {
-    if (!queryParam) { return; }
-    return limit(parseInt(queryParam));
-}
-
-const parseOffset = (queryParam) => {
-    if (!queryParam) { return; }
-    return offset(parseInt(queryParam));
-}
-
-const toQueryFromString = (queryString) => {
-    const queryParams = qs.parse(queryString);
-    const order = parseOrder(queryParams.order); 
-    const limit = parseLimit(queryParams.limit);
-    const offset = parseOffset(queryParams.offset);
-    return q(order, limit, offset);
-}
-
-describe.only('toQueryFromString', () => {
+describe('fromQueryParams', () => {
     [
         { object: q(), queryParam: '' },
         { object: q(order(asc('property'))), queryParam: 'order=property.asc' },
@@ -52,10 +14,21 @@ describe.only('toQueryFromString', () => {
         { object: q(order(desc('property', { nulls: 'last' }))), queryParam: 'order=property.desc.nullslast' },
         { object: q(limit(1)), queryParam: 'limit=1' },
         { object: q(offset(1)), queryParam: 'offset=1' },
-        
+
+        { object: q(where({ prop: oneOf() })), queryParam: 'prop=in.()' },
+
+        { object: q(where({ prop: oneOf(1, 2, 3) })), queryParam: 'prop=in.(1,2,3)' },
+		{ object: q(where({ prop: oneOf('Sepp', 'Huber') })), queryParam: 'prop=in.("Sepp","Huber")' },
+        { object: q(where({ prop: eq(1) })), queryParam: 'prop=eq.1' },
+        { object: q(where({ prop: eq(null) })), queryParam: 'prop=is.null' },
+        { object: q(where({ prop: gt(1) })), queryParam: 'prop=gt.1' },
+        { object: q(where({ prop: gte(1) })), queryParam: 'prop=gte.1' },
+        { object: q(where({ prop: lt(1) })), queryParam: 'prop=lt.1' },
+		{ object: q(where({ prop: lte(1) })), queryParam: 'prop=lte.1' },
+		{ object: q(where({ prop1: eq(1), prop2: eq(2) })), queryParam: 'prop1=eq.1&prop2=eq.2' },
     ].forEach(({ object, queryParam }) => {
         it(`${queryParam}`, () => {
-            assertThat(toQueryFromString(queryParam), equalTo(object));
+            assertThat(fromQueryParams(queryParam), equalTo(object));
         });
     })
 });
