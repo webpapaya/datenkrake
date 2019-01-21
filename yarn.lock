@@ -915,6 +915,11 @@ camelcase@^2.1.1:
   resolved "https://registry.yarnpkg.com/camelcase/-/camelcase-2.1.1.tgz#7c1d16d679a1bbe59ca02cacecfb011e201f5a1f"
   integrity sha1-fB0W1nmhu+WcoCys7PsBHiAfWh8=
 
+camelcase@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/camelcase/-/camelcase-5.0.0.tgz#03295527d58bd3cd4aa75363f35b2e8d97be2f42"
+  integrity sha512-faqwZqnWxbxn+F1d399ygeamQNy3lPp/H9H6rNrqYh4FSVCtcY+3cub1MxA8o9mDd55mM8Aghuu/kuyYA6VTsA==
+
 caniuse-lite@^1.0.30000928:
   version "1.0.30000928"
   resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30000928.tgz#805e828dc72b06498e3683a32e61c7507fd67b88"
@@ -2120,6 +2125,11 @@ promise-frites@^0.10.0:
   version "0.10.0"
   resolved "https://registry.yarnpkg.com/promise-frites/-/promise-frites-0.10.0.tgz#b691c150c02fc9bfaa4f9c841035710e6d593db7"
   integrity sha1-tpHBUMAvyb+qT5yEEDVxDm1ZPbc=
+
+qs@^6.6.0:
+  version "6.6.0"
+  resolved "https://registry.yarnpkg.com/qs/-/qs-6.6.0.tgz#a99c0f69a8d26bf7ef012f871cdabb0aee4424c2"
+  integrity sha512-KIJqT9jQJDQx5h5uAVPimw6yVg2SekOKu959OCtktD3FjzbpvaPr8i4zzg07DOMz+igA4W/aNM7OV8H37pFYfA==
 
 ramda@^0.26.1:
   version "0.26.1"

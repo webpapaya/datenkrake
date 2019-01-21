@@ -1,4 +1,5 @@
 const appendOperator = (result, definition) => {
+	if (!definition) { return result; }
 	/* eslint-disable no-param-reassign */
 	if (definition.operator === 'where') {
 		result.where = { ...result.where, ...definition.value };

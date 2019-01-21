@@ -24,94 +24,97 @@ import buildQueryParams, {
 
 describe('buildQueryParams', () => {
 	[
-		{ input: null, result: '' },
-		{ input: undefined, result: '' },
-		{ input: q(order(asc('property'))), result: '?order=property.asc' },
-		{ input: q(order(asc('camelCase'))), result: '?order=camel_case.asc' },
-		{ input: q(where({ property: eq(1) })), result: '?property=eq.1' },
-		{ input: q(limit(1)), result: '?limit=1' },
-		{ input: q(offset(1)), result: '?offset=1' },
+		{ object: null, queryParam: '' },
+		{ object: undefined, queryParam: '' },
+		{ object: q(order(asc('property'))), queryParam: '?order=property.asc' },
+		{ object: q(order(asc('camelCase'))), queryParam: '?order=camel_case.asc' },
+		{ object: q(where({ property: eq(1) })), queryParam: '?property=eq.1' },
+		{ object: q(limit(1)), queryParam: '?limit=1' },
+		{ object: q(offset(1)), queryParam: '?offset=1' },
 		{
-			result: '?property=eq.1&order=property.asc',
-			input: q(
+			queryParam: '?property=eq.1&order=property.asc',
+			object: q(
 				order(asc('property')),
 				where({ property: eq(1) }),
 			),
 		},
-	].forEach(({ input, result }) => {
-		it(`${input} results in ${result}`, () => {
-			assertThat(buildQueryParams(input), equalTo(result));
+	].forEach(({ object, queryParam }) => {
+		it(`${object} queryParams in ${queryParam}`, () => {
+			assertThat(buildQueryParams(object), equalTo(queryParam));
 		});
 	});
 });
 
 describe('buildQueryParamsForWhere', () => {
 	[
-		{ input: {}, result: '' },
-		{ input: { prop: eq(1) }, result: 'prop=eq.1' },
-		{ input: { prop: eq(null) }, result: 'prop=is.null' },
-		{ input: { camelCase: eq(1) }, result: 'camel_case=eq.1' },
+		{ object: {}, queryParam: '' },
+		{ object: { prop: eq(1) }, queryParam: 'prop=eq.1' },
+		{ object: { prop: eq(null) }, queryParam: 'prop=is.null' },
+		{ object: { camelCase: eq(1) }, queryParam: 'camel_case=eq.1' },
+		{ object: { prop: eq(1) }, queryParam: 'prop=eq.1' },
+		{ object: { prop: eq(null) }, queryParam: 'prop=is.null' },
+		{ object: { camelCase: eq(1) }, queryParam: 'camel_case=eq.1' },
 
-		{ input: { prop: oneOf() }, result: 'prop=in.()' },
-		{ input: { prop: oneOf(1, 2, 3) }, result: 'prop=in.(1,2,3)' },
-		{ input: { prop: oneOf('Sepp', 'Huber') }, result: 'prop=in.("Sepp","Huber")' },
-		{ input: { prop: gt(1) }, result: 'prop=gt.1' },
-		{ input: { prop: gte(1) }, result: 'prop=gte.1' },
-		{ input: { prop: like('%first%last') }, result: 'prop=like.*first*last' },
+		{ object: { prop: oneOf() }, queryParam: 'prop=in.()' },
+		{ object: { prop: oneOf(1, 2, 3) }, queryParam: 'prop=in.(1,2,3)' },
+		{ object: { prop: oneOf('Sepp', 'Huber') }, queryParam: 'prop=in.("Sepp","Huber")' },
+		{ object: { prop: gt(1) }, queryParam: 'prop=gt.1' },
+		{ object: { prop: gte(1) }, queryParam: 'prop=gte.1' },
+		{ object: { prop: like('%first%last') }, queryParam: 'prop=like.*first*last' },
 
-		{ input: { prop: like('%first%last', { caseSensitive: false }) }, result: 'prop=ilike.*first*last' },
-		{ input: { prop: like('%first%last', { caseSensitive: true }) }, result: 'prop=like.*first*last' },
+		{ object: { prop: like('%first%last', { caseSensitive: false }) }, queryParam: 'prop=ilike.*first*last' },
+		{ object: { prop: like('%first%last', { caseSensitive: true }) }, queryParam: 'prop=like.*first*last' },
 
-		{ input: { prop: lt(1) }, result: 'prop=lt.1' },
-		{ input: { prop: lte(1) }, result: 'prop=lte.1' },
-		{ input: { prop: not(eq(1)) }, result: 'prop=not.eq.1' },
-		{ input: { prop1: eq(1), prop2: eq(2) }, result: 'prop1=eq.1&prop2=eq.2' },
+		{ object: { prop: lt(1) }, queryParam: 'prop=lt.1' },
+		{ object: { prop: lte(1) }, queryParam: 'prop=lte.1' },
+		{ object: { prop: not(eq(1)) }, queryParam: 'prop=not.eq.1' },
+		{ object: { prop1: eq(1), prop2: eq(2) }, queryParam: 'prop1=eq.1&prop2=eq.2' },
 
-		{ input: { prop: { operator: 'unknown', value: 1 } }, result: '' },
-	].forEach(({ input, result }) => {
-		it(`${JSON.stringify(input)} results in ${result}`, () => {
-			assertThat(buildQueryParamsForWhere(input), equalTo(result));
+		{ object: { prop: { operator: 'unknown', value: 1 } }, queryParam: '' },
+	].forEach(({ object, queryParam }) => {
+		it(`${JSON.stringify(object)} queryParams in ${queryParam}`, () => {
+			assertThat(buildQueryParamsForWhere(object), equalTo(queryParam));
 		});
 	});
 });
 
 describe('buildQueryParamsForOrder', () => {
 	[
-		{ input: [], result: '' },
-		{ input: [asc('property')], result: 'order=property.asc' },
-		{ input: [desc('property')], result: 'order=property.desc' },
-		{ input: [asc('property1'), desc('property2')], result: 'order=property1.asc,property2.desc' },
-		{ input: [asc('property', { nulls: 'first' })], result: 'order=property.asc.nullsfirst' },
-		{ input: [asc('property', { nulls: 'last' })], result: 'order=property.asc.nullslast' },
-		{ input: [desc('property', { nulls: 'first' })], result: 'order=property.desc.nullsfirst' },
-		{ input: [desc('property', { nulls: 'last' })], result: 'order=property.desc.nullslast' },
-	].forEach(({ input, result }) => {
-		it(`${JSON.stringify(input)} results in ${result}`, () => {
-			assertThat(buildQueryParamsForOrder(input), equalTo(result));
+		{ object: [], queryParam: '' },
+		{ object: [asc('property')], queryParam: 'order=property.asc' },
+		{ object: [desc('property')], queryParam: 'order=property.desc' },
+		{ object: [asc('property1'), desc('property2')], queryParam: 'order=property1.asc,property2.desc' },
+		{ object: [asc('property', { nulls: 'first' })], queryParam: 'order=property.asc.nullsfirst' },
+		{ object: [asc('property', { nulls: 'last' })], queryParam: 'order=property.asc.nullslast' },
+		{ object: [desc('property', { nulls: 'first' })], queryParam: 'order=property.desc.nullsfirst' },
+		{ object: [desc('property', { nulls: 'last' })], queryParam: 'order=property.desc.nullslast' },
+	].forEach(({ object, queryParam }) => {
+		it(`${JSON.stringify(object)} queryParams in ${queryParam}`, () => {
+			assertThat(buildQueryParamsForOrder(object), equalTo(queryParam));
 		});
 	});
 });
 
 describe('buildQueryParamsForLimit', () => {
 	[
-		{ input: undefined, result: '' },
-		{ input: null, result: '' },
-		{ input: 1, result: 'limit=1' },
-	].forEach(({ input, result }) => {
-		it(`${JSON.stringify(order)} results in ${result}`, () => {
-			assertThat(buildQueryParamsForLimit(input), equalTo(result));
+		{ object: undefined, queryParam: '' },
+		{ object: null, queryParam: '' },
+		{ object: 1, queryParam: 'limit=1' },
+	].forEach(({ object, queryParam }) => {
+		it(`${JSON.stringify(order)} queryParams in ${queryParam}`, () => {
+			assertThat(buildQueryParamsForLimit(object), equalTo(queryParam));
 		});
 	});
 });
 
 describe('buildQueryParamsForOffset', () => {
 	[
-		{ input: undefined, result: '' },
-		{ input: null, result: '' },
-		{ input: 1, result: 'offset=1' },
-	].forEach(({ input, result }) => {
-		it(`${JSON.stringify(order)} results in ${result}`, () => {
-			assertThat(buildQueryParamsForOffset(input), equalTo(result));
+		{ object: undefined, queryParam: '' },
+		{ object: null, queryParam: '' },
+		{ object: 1, queryParam: 'offset=1' },
+	].forEach(({ object, queryParam }) => {
+		it(`${JSON.stringify(order)} queryParams in ${queryParam}`, () => {
+			assertThat(buildQueryParamsForOffset(object), equalTo(queryParam));
 		});
 	});
 });
