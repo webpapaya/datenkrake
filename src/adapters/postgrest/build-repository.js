@@ -1,7 +1,7 @@
 import camelCaseKeys from 'camelcase-keys-deep';
 import decamelCaseKeys from 'decamelize-keys-deep';
 import decamelize from 'decamelize';
-import buildQueryParams from './query-params';
+import buildQueryParams from './to-query-params';
 
 const requiredParam = (name) => { throw Error(`${name} is a required parameter`); };
 const parseContentRange = (contentRange) => {

@@ -20,7 +20,7 @@ import buildQueryParams, {
 	buildQueryParamsForOrder,
 	buildQueryParamsForLimit,
 	buildQueryParamsForOffset,
-} from './query-params';
+} from './to-query-params';
 
 describe('buildQueryParams', () => {
 	[

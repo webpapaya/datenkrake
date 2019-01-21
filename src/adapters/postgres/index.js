@@ -63,6 +63,7 @@ const orderToSql = (query = {}) => {
 
 export const buildRepository = ({ resource }) => {
     const where = (connection, filter = {}) => {
+        // TODO: fix SQL Injection in where and order
         return connection.query({
             text: sql`
                 SELECT *

@@ -62,9 +62,7 @@ export const buildQueryParamsForLimit = limit => toQueryParam('limit', limit);
 export const buildQueryParamsForOffset = offset => toQueryParam('offset', offset);
 
 export default (query) => {
-	const {
-		where, order, limit, offset,
-	} = query || {};
+	const { where, order, limit, offset } = query || {};
 	const queryParams = [
 		buildQueryParamsForWhere(where),
 		buildQueryParamsForOrder(order),
