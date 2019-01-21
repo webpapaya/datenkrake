@@ -17,3 +17,5 @@ export const setAuthentication = (connection, token) => {
 export const unsetAuthentication = connection => setAuthentication(connection, null);
 
 export { default as buildRepository } from './build-repository';
+export { default as toQueryParams } from './to-query-params';
+export { default as fromQueryParams } from './from-query-params';
