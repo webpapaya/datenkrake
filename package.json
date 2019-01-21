@@ -1,6 +1,6 @@
 {
   "name": "datenkrake",
-  "version": "0.0.1-alpha",
+  "version": "0.0.1",
   "description": "",
   "main": "src/index.js",
   "scripts": {
