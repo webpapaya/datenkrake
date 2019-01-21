@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "lint": "eslint src/",
     "test": "docker-compose up -d && mocha --compilers js:@babel/register $(find . -name '*.spec.js' -not -path './node_modules/*')"
   },
   "author": "Thomas Mayrhofer",
@@ -15,6 +16,9 @@
     "@babel/preset-env": "^7.2.3",
     "@babel/register": "^7.0.0",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
+    "eslint": "^5.12.1",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.14.0",
     "hamjest": "^3.2.1",
     "mocha": "^5.2.0"
   },

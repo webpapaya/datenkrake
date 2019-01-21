@@ -1,6 +1,6 @@
 const buildOperator = (operator, defaultOptions = {}) => (value, operatorOptions = {}) => {
-	const options = { ...defaultOptions, ...operatorOptions };
-	return { operator, value, options };
+  const options = { ...defaultOptions, ...operatorOptions };
+  return { operator, value, options };
 };
 
 export const eq = buildOperator('eq');
