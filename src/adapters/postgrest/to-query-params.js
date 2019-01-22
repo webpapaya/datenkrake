@@ -73,6 +73,6 @@ export default (query) => {
   ].filter(queryParam => queryParam);
 
   return queryParams.length > 0
-    ? `?${queryParams.join('&')}`
+    ? `${queryParams.join('&')}`
     : '';
 };

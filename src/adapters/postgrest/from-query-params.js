@@ -21,8 +21,13 @@ const parseValue = (n) => {
 const parseString = (string) => {
   const [operator, value] = string.split('.').map(parseValue);
 
-  if (value === null) { return OPERATORS.eq(value); }
-  if (operator === 'in') {
+  if (value === null) {
+    return OPERATORS.eq(value);
+  } if (operator === 'like') {
+    return OPERATORS.like(value.replace(/\*/g, '%'), { caseSensitive: true });
+  } if (operator === 'ilike') {
+    return OPERATORS.like(value.replace(/\*/g, '%'), { caseSensitive: false });
+  } if (operator === 'in') {
     const parsedValue = value === '()' ? [] : value.slice(1, -1).split(',').map(parseValue);
     return OPERATORS.oneOf(...parsedValue);
   }
@@ -68,7 +73,7 @@ const parseWhere = (queryParams) => {
 };
 
 export default (queryString) => {
-  const queryParams = qs.parse(queryString);
+  const queryParams = qs.parse(removeFirstAndLastIfCharacter('\\?', queryString));
   const {
     order, limit, offset, ...rest // eslint-disable-line no-shadow
   } = queryParams;

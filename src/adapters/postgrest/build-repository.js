@@ -35,16 +35,16 @@ const buildRepository = ({
     const headers = hasPaginationOverwritten ? {} : { Range: `0-${limit - 1}` };
 
     return Promise.resolve()
-      .then(() => connection.get(`${url}${queryString}`, { headers }))
+      .then(() => connection.get(`${url}?${queryString}`, { headers }))
       .then(parseResponse);
   };
 
   const update = (connection, filter, values) => Promise.resolve()
-    .then(() => connection.patch(`${url}${buildQueryParams(filter)}`, decamelCaseKeys(values)))
+    .then(() => connection.patch(`${url}?${buildQueryParams(filter)}`, decamelCaseKeys(values)))
     .then(parseResponse);
 
   const destroy = (connection, filter) => Promise.resolve()
-    .then(() => connection.delete(`${url}${buildQueryParams(filter)}`))
+    .then(() => connection.delete(`${url}?${buildQueryParams(filter)}`))
     .then(parseResponse);
 
   return {

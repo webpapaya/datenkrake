@@ -26,13 +26,13 @@ describe('buildQueryParams', () => {
   [
     { object: null, queryParam: '' },
     { object: undefined, queryParam: '' },
-    { object: q(order(asc('property'))), queryParam: '?order=property.asc' },
-    { object: q(order(asc('camelCase'))), queryParam: '?order=camel_case.asc' },
-    { object: q(where({ property: eq(1) })), queryParam: '?property=eq.1' },
-    { object: q(limit(1)), queryParam: '?limit=1' },
-    { object: q(offset(1)), queryParam: '?offset=1' },
+    { object: q(order(asc('property'))), queryParam: 'order=property.asc' },
+    { object: q(order(asc('camelCase'))), queryParam: 'order=camel_case.asc' },
+    { object: q(where({ property: eq(1) })), queryParam: 'property=eq.1' },
+    { object: q(limit(1)), queryParam: 'limit=1' },
+    { object: q(offset(1)), queryParam: 'offset=1' },
     {
-      queryParam: '?property=eq.1&order=property.asc',
+      queryParam: 'property=eq.1&order=property.asc',
       object: q(
         order(asc('property')),
         where({ property: eq(1) }),
