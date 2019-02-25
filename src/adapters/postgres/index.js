@@ -1,5 +1,6 @@
 import { isEmpty } from 'ramda';
 import { oneLine as sql } from 'common-tags';
+import RecordList from '../../record-list';
 
 const toKeyValueArray = object => Object.keys(object)
   .map((key, index) => ({ key, value: object[key], index }));
@@ -60,8 +61,16 @@ const orderToSql = (query = {}) => {
 
 
 export const buildRepository = ({ resource }) => {
-  const where = (connection, filter = {}) =>
-  // TODO: fix SQL Injection in where and order
+  const count = (connection, filter) => connection.query({
+    text: sql`
+                SELECT count(*) as count 
+                FROM ${resource}
+                ${queryToSql(filter)};
+            `,
+  }).then(result => parseInt(result.rows[0].count, 10));
+
+
+  const where = (connection, filter = {}) => Promise.all([
     connection.query({
       text: sql`
                 SELECT *
@@ -69,7 +78,14 @@ export const buildRepository = ({ resource }) => {
                 ${queryToSql(filter)}
                 ${orderToSql(filter)};
             `,
-    }).then(result => result.rows);
+    }),
+    count(connection, filter),
+  ]).then(([result, total]) => {
+    const records = result.rows;
+    const meta = { total, length: records.length };
+
+    return new RecordList({ meta, records });
+  });
 
 
   const create = (connection, record) => {
@@ -88,13 +104,6 @@ export const buildRepository = ({ resource }) => {
     }).then(result => result.rows[0]);
   };
 
-  const count = (connection, filter) => connection.query({
-    text: sql`
-                SELECT count(*) as count 
-                FROM ${resource}
-                ${queryToSql(filter)};
-            `,
-  }).then(result => parseInt(result.rows[0].count, 10));
 
   const update = (connection, filter, record = {}) => {
     if (isEmpty(record)) return where(connection, filter);
@@ -103,30 +112,37 @@ export const buildRepository = ({ resource }) => {
     const chunks = recordAsArray.map(({ key, index }) => `${key}=$${index + 1}`);
     const values = recordAsArray.map(({ value }) => value);
 
-    return connection.query({
-      text: sql`
-                UPDATE ${resource}
-                SET ${chunks.join(', ')}
-                ${queryToSql(filter)}
-                RETURNING *;
-            `,
-      values,
-    }).then(result => result.rows);
+    return Promise.all([
+      connection.query({
+        values,
+        text: sql`
+                  UPDATE ${resource}
+                  SET ${chunks.join(', ')}
+                  ${queryToSql(filter)}
+                  RETURNING *;
+              `,
+      }),
+      count(connection, filter),
+    ]).then(([result, total]) => {
+      const records = result.rows;
+      const meta = { total, length: records.length };
+
+      return new RecordList({ meta, records });
+    });
   };
 
-  const destroy = (connection, filter) => {
-    const query = {
-      text: sql`
+  const destroy = (connection, filter) => connection.query({
+    text: sql`
                 DELETE 
                 FROM ${resource}
                 ${queryToSql(filter)}
                 RETURNING *;
             `,
-    };
-
-    return connection.query(query)
-      .then(result => result.rows);
-  };
+  }).then((result) => {
+    const records = result.rows;
+    const meta = { total: 0, length: records.length };
+    return new RecordList({ records, meta });
+  });
 
   return {
     update,

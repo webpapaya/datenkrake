@@ -1,4 +1,5 @@
 import { filterByQuery } from '../../selectors';
+import RecordList from '../../record-list';
 
 const promisify = object => Object.keys(object).reduce((result, key) => {
   // eslint-disable-next-line no-param-reassign
@@ -12,15 +13,24 @@ const buildRepository = ({ resource }) => {
     connection[resource] = records;
   };
 
+  const toRecordList = (connection, records) => {
+    const meta = {
+      total: (connection[resource] || []).length,
+      length: records.length,
+    };
+    return new RecordList({ records, meta });
+  };
+
   const where = (connection, query) => {
     const records = connection[resource] || [];
-    return filterByQuery(query, records);
+    const filteredRecords = filterByQuery(query, records);
+    return toRecordList(connection, filteredRecords);
   };
 
   const destroy = (connection, query) => {
     const destroyedRecords = where(connection, query);
     persist(connection, connection[resource].filter(record => !destroyedRecords.includes(record)));
-    return destroyedRecords;
+    return toRecordList(connection, destroyedRecords);
   };
 
   const create = (connection, record) => {
@@ -40,7 +50,7 @@ const buildRepository = ({ resource }) => {
       return updatedRecord;
     });
     persist(connection, nextRecords);
-    return recordsToReturn;
+    return toRecordList(connection, recordsToReturn);
   };
 
   const count = (connection, query) => where(connection, query).length;

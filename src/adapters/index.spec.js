@@ -93,6 +93,15 @@ const assertDifference = async (fn, countFn, difference) => {
         { text: 'ghi', property: null },
       ];
 
+      it('contains correct meta information', t(async ({ connection }) => {
+        await setupRecords(connection, records);
+        const { meta } = await repository.destroy(connection, null);
+        assertThat(meta, equalTo({
+          length: records.length,
+          total: 0,
+        }));
+      }));
+
       it('removes record from connection', t(async ({ connection }) => {
         await setupRecords(connection, records);
         await repository.destroy(connection, q(where({ property: eq(1) })));
@@ -124,6 +133,15 @@ const assertDifference = async (fn, countFn, difference) => {
         { text: 'ghi', property: null },
       ];
 
+      it('contains correct meta information', t(async ({ connection }) => {
+        await setupRecords(connection, records);
+        const { meta } = await repository.update(connection, null, { text: 'updated' });
+        assertThat(meta, equalTo({
+          length: records.length,
+          total: records.length,
+        }));
+      }));
+
       it('does NOT change the record count', t(async ({ connection }) => {
         await setupRecords(connection, records);
         await assertDifference(
@@ -154,6 +172,15 @@ const assertDifference = async (fn, countFn, difference) => {
         { text: 'def', property: 2 },
         { text: 'ghi', property: null },
       ];
+
+      it('contains correct meta information', t(async ({ connection }) => {
+        await setupRecords(connection, records);
+        const { meta } = await repository.where(connection);
+        assertThat(meta, equalTo({
+          length: records.length,
+          total: records.length,
+        }));
+      }));
 
       describe('filters', () => {
         it('returns all records without a filter', t(async ({ connection }) => {
