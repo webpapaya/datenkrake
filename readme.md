@@ -1,7 +1,7 @@
 # Datenkrake
 **Under heavy development**
 
-Datenkrake is a rough idea of mine. Datenkrake is a unified data-access layer which can be used in the browser and on the server. The idea is to have composable queries which can be serialised into query params and interpreted on the server. It might be seen as a lightweight graphQL over REST. The idea came to me while checking out PostgREST which provides a REST-API based on your postgres schema.
+Datenkrake is a rough idea of mine. Datenkrake is a unified data-access layer which can be used in the browser and on the server. The idea is to have composable queries which can be serialised into query params and interpreted on the server. It might be seen as stripped down graphQL over REST. The idea came to me while checking out PostgREST which provides a REST-API based on your postgres schema.
 
 ## Quick introduction:
 
