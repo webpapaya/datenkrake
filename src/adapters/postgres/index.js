@@ -1,4 +1,5 @@
 import { isEmpty } from 'ramda';
+import { toRecordList } from '../record-list';
 import { oneLine as sql } from 'common-tags';
 
 const toKeyValueArray = object => Object.keys(object)
@@ -58,19 +59,19 @@ const orderToSql = (query = {}) => {
   return isEmpty(orderStatement) ? '' : `ORDER BY ${orderStatement}`;
 };
 
-
 export const buildRepository = ({ resource }) => {
-  const where = (connection, filter = {}) =>
-  // TODO: fix SQL Injection in where and order
-    connection.query({
-      text: sql`
-                SELECT *
-                FROM ${resource}
-                ${queryToSql(filter)}
-                ${orderToSql(filter)};
-            `,
-    }).then(result => result.rows);
+  const where = async (connection, filter = {}) => {
+    // TODO: fix SQL Injection in where and order
+    const query = sql`
+      SELECT *
+      FROM ${resource}
+      ${queryToSql(filter)}
+      ${orderToSql(filter)};
+    `;
 
+    return connection.query({ text: query })
+      .then(result => toRecordList(result.rows));
+  };
 
   const create = (connection, record) => {
     const recordAsArray = toKeyValueArray(record);
@@ -78,23 +79,26 @@ export const buildRepository = ({ resource }) => {
     const chunks = recordAsArray.map(({ index }) => `$${index + 1}`);
     const values = recordAsArray.map(({ value }) => value);
 
-    return connection.query({
-      text: sql`
-                INSERT INTO ${resource} (${columns.join(', ')})
-                VALUES (${chunks.join(',')})
-                RETURNING *;
-            `,
-      values,
-    }).then(result => result.rows[0]);
+    const query = sql`
+      INSERT INTO ${resource} (${columns.join(', ')})
+      VALUES (${chunks.join(',')})
+      RETURNING *;
+    `;
+
+    return connection.query({ text: query, values })
+      .then(result => result.rows[0]);
   };
 
-  const count = (connection, filter) => connection.query({
-    text: sql`
-                SELECT count(*) as count 
-                FROM ${resource}
-                ${queryToSql(filter)};
-            `,
-  }).then(result => parseInt(result.rows[0].count, 10));
+  const count = (connection, filter) => {
+    const query = sql`
+      SELECT count(*) as count
+      FROM ${resource}
+      ${queryToSql(filter)};
+    `;
+
+    return connection.query({ text: query })
+      .then(result => parseInt(result.rows[0].count, 10));
+  }
 
   const update = (connection, filter, record = {}) => {
     if (isEmpty(record)) return where(connection, filter);
@@ -103,29 +107,27 @@ export const buildRepository = ({ resource }) => {
     const chunks = recordAsArray.map(({ key, index }) => `${key}=$${index + 1}`);
     const values = recordAsArray.map(({ value }) => value);
 
-    return connection.query({
-      text: sql`
-                UPDATE ${resource}
-                SET ${chunks.join(', ')}
-                ${queryToSql(filter)}
-                RETURNING *;
-            `,
-      values,
-    }).then(result => result.rows);
+    const query = sql`
+      UPDATE ${resource}
+      SET ${chunks.join(', ')}
+      ${queryToSql(filter)}
+      RETURNING *;
+    `;
+
+    return connection.query({ values, text: query })
+      .then(result => toRecordList(result.rows));
   };
 
   const destroy = (connection, filter) => {
-    const query = {
-      text: sql`
-                DELETE 
-                FROM ${resource}
-                ${queryToSql(filter)}
-                RETURNING *;
-            `,
-    };
+    const query = sql`
+      DELETE
+      FROM ${resource}
+      ${queryToSql(filter)}
+      RETURNING *;
+    `;
 
-    return connection.query(query)
-      .then(result => result.rows);
+    return connection.query({ text: query })
+      .then(result => toRecordList(result.rows));
   };
 
   return {
