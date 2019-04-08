@@ -1,5 +1,5 @@
 import { filterByQuery } from '../../selectors';
-import { toRecordList } from '../record-list';
+import decorateWithRecordList from '../decorate-with-record-list';
 
 const promisify = object => Object.keys(object).reduce((result, key) => {
   // eslint-disable-next-line no-param-reassign
@@ -7,7 +7,7 @@ const promisify = object => Object.keys(object).reduce((result, key) => {
   return result;
 }, {});
 
-const buildRepository = ({ resource }) => {
+const buildRepository = decorateWithRecordList(({ resource }) => {
   const persist = (connection, records) => {
     // eslint-disable-next-line no-param-reassign
     connection[resource] = records;
@@ -15,13 +15,13 @@ const buildRepository = ({ resource }) => {
 
   const where = (connection, query) => {
     const records = connection[resource] || [];
-    return toRecordList(filterByQuery(query, records));
+    return filterByQuery(query, records);
   };
 
   const destroy = (connection, query) => {
     const destroyedRecords = where(connection, query);
     persist(connection, connection[resource].filter(record => !destroyedRecords.includes(record)));
-    return toRecordList(destroyedRecords);
+    return destroyedRecords;
   };
 
   const create = (connection, record) => {
@@ -41,7 +41,7 @@ const buildRepository = ({ resource }) => {
       return updatedRecord;
     });
     persist(connection, nextRecords);
-    return toRecordList(recordsToReturn);
+    return recordsToReturn;
   };
 
   const count = (connection, query) => where(connection, query).length;
@@ -53,6 +53,6 @@ const buildRepository = ({ resource }) => {
     destroy,
     update,
   });
-};
+});
 
 export default buildRepository;

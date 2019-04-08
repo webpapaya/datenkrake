@@ -1,6 +1,6 @@
 import { isEmpty } from 'ramda';
-import { toRecordList } from '../record-list';
 import { oneLine as sql } from 'common-tags';
+import decorateWithRecordList from '../decorate-with-record-list';
 
 const toKeyValueArray = object => Object.keys(object)
   .map((key, index) => ({ key, value: object[key], index }));
@@ -59,8 +59,19 @@ const orderToSql = (query = {}) => {
   return isEmpty(orderStatement) ? '' : `ORDER BY ${orderStatement}`;
 };
 
-export const buildRepository = ({ resource }) => {
-  const where = async (connection, filter = {}) => {
+export const buildRepository = decorateWithRecordList(({ resource }) => {
+  const count = (connection, filter) => {
+    const query = sql`
+      SELECT count(*) as count
+      FROM ${resource}
+      ${queryToSql(filter)};
+    `;
+
+    return connection.query({ text: query })
+      .then(result => parseInt(result.rows[0].count, 10));
+  }
+
+  const where = async (connection, filter = {}, options = {}) => {
     // TODO: fix SQL Injection in where and order
     const query = sql`
       SELECT *
@@ -70,7 +81,7 @@ export const buildRepository = ({ resource }) => {
     `;
 
     return connection.query({ text: query })
-      .then(result => toRecordList(result.rows));
+      .then((result) => result.rows);
   };
 
   const create = (connection, record) => {
@@ -89,17 +100,6 @@ export const buildRepository = ({ resource }) => {
       .then(result => result.rows[0]);
   };
 
-  const count = (connection, filter) => {
-    const query = sql`
-      SELECT count(*) as count
-      FROM ${resource}
-      ${queryToSql(filter)};
-    `;
-
-    return connection.query({ text: query })
-      .then(result => parseInt(result.rows[0].count, 10));
-  }
-
   const update = (connection, filter, record = {}) => {
     if (isEmpty(record)) return where(connection, filter);
 
@@ -115,7 +115,7 @@ export const buildRepository = ({ resource }) => {
     `;
 
     return connection.query({ values, text: query })
-      .then(result => toRecordList(result.rows));
+      .then(result => result.rows);
   };
 
   const destroy = (connection, filter) => {
@@ -127,7 +127,7 @@ export const buildRepository = ({ resource }) => {
     `;
 
     return connection.query({ text: query })
-      .then(result => toRecordList(result.rows));
+      .then(result => result.rows);
   };
 
   return {
@@ -137,7 +137,7 @@ export const buildRepository = ({ resource }) => {
     create,
     destroy,
   };
-};
+});
 
 export { buildConnection, releaseConnection } from './connection';
 export { default as withinTransaction } from './within-transaction';
