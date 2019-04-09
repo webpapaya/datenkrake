@@ -70,8 +70,7 @@ const orderRecords = (query, records) => {
 };
 
 const paginateRecords = (query, records) => {
-  const { limit, offset } = query || {};
-  if (isNil(limit) && isNil(offset)) { return records; }
+  const { limit = records.length, offset = 0 } = query || {};
   return rSlice(offset, offset + limit, records);
 };
 

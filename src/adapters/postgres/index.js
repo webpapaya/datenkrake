@@ -59,6 +59,14 @@ const orderToSql = (query = {}) => {
   return isEmpty(orderStatement) ? '' : `ORDER BY ${orderStatement}`;
 };
 
+const paginationToSql = (query = {}) => {
+  const { limit, offset } = query;
+  return `
+    ${limit ? `LIMIT ${limit}` : ''}
+    ${offset ? `OFFSET ${offset}` : ''}
+  `;
+}
+
 export const buildRepository = decorateWithRecordList(({ resource }) => {
   const count = (connection, filter) => {
     const query = sql`
@@ -77,7 +85,8 @@ export const buildRepository = decorateWithRecordList(({ resource }) => {
       SELECT *
       FROM ${resource}
       ${queryToSql(filter)}
-      ${orderToSql(filter)};
+      ${orderToSql(filter)}
+      ${paginationToSql(filter)};
     `;
 
     return connection.query({ text: query })

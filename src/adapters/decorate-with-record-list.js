@@ -12,11 +12,11 @@ const decorateWithRecordList = (buildReporitoryFn) => (...args) => {
     destroy: (...args) => repository.destroy(...args)
       .then((records) => toRecordList(records, { total: records.length })),
 
-    where: (...args) => Promise.all([
-      repository.where(...args),
-      repository.count(...args),
+    where: (connection, query = {}) => Promise.all([
+      repository.where(connection, query),
+      repository.count(connection, {}),
     ]).then(([records, total]) => {
-      return toRecordList(records, { total })
+      return toRecordList(records, { total, limit: query.limit, offset: query.offset })
     })
   }
 };

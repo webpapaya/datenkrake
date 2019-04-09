@@ -6,10 +6,11 @@ import {
   hasItems,
   contains,
   hasProperty,
+  hasProperties,
   everyItem,
 } from 'hamjest';
 
-import { q, where, order } from '../query-builder';
+import { q, where, order, limit, offset } from '../query-builder';
 import {
   eq, gt, gte, lt, lte, oneOf, like, not, asc, desc,
 } from '../operators';
@@ -145,6 +146,39 @@ const assertDifference = async (fn, countFn, difference) => {
 
         assertThat(await repository.where(connection, q(where({ property: not(eq(1)) }))),
           everyItem(negate(hasProperty('text', 'updated'))));
+      }));
+    });
+
+    describe('pagination', () => {
+      const records = [
+        { text: 'abc', property: 1 },
+        { text: 'def', property: 2 },
+        { text: 'ghi', property: null },
+      ];
+
+      it('limit clause is respected', t(async ({ connection }) => {
+        await setupRecords(connection, records);
+        assertThat(await repository.where(connection, q(limit(1))), hasProperty('length', equalTo(1)));
+      }));
+
+      it('offset clause is respected', t(async ({ connection }) => {
+        await setupRecords(connection, records);
+        assertThat(await repository.where(connection, q(offset(1))), hasProperty('length', equalTo(2)));
+      }));
+
+      it('returns empty record list on high offset', t(async ({ connection }) => {
+        await setupRecords(connection, records);
+        assertThat(await repository.where(connection, q(offset(100))), hasProperty('length', equalTo(0)));
+      }));
+
+      it('returns pagination info', t(async ({ connection }) => {
+        await setupRecords(connection, records);
+
+        assertThat(await repository.where(connection, q(limit(1), offset(2))), hasProperties({
+          total: 3,
+          limit: 1,
+          offset: 2,
+        }));
       }));
     });
 
