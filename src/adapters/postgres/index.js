@@ -1,6 +1,7 @@
 import { isEmpty } from 'ramda';
 import { oneLine as sql } from 'common-tags';
 import decorateWithRecordList from '../decorate-with-record-list';
+import prepareQuery from './prepare-query';
 
 const toKeyValueArray = object => Object.keys(object)
   .map((key, index) => ({ key, value: object[key], index }));
@@ -32,7 +33,7 @@ const definitionToStatement = (result, property, where) => {
   return result;
 };
 
-const queryToSql = (query) => {
+const filterToSql = (query) => {
   const where = (query || {}).where || {};
   const sqlWhereClause = Object.keys(where)
     .reduce((result, property) => definitionToStatement(result, property, where), []);
@@ -59,37 +60,33 @@ const orderToSql = (query = {}) => {
   return isEmpty(orderStatement) ? '' : `ORDER BY ${orderStatement}`;
 };
 
-const paginationToSql = (query = {}) => {
-  const { limit, offset } = query;
-  return `
-    ${limit ? `LIMIT ${limit}` : ''}
-    ${offset ? `OFFSET ${offset}` : ''}
+const paginationToSql = (query = {}) => `
+    ${query.limit ? 'LIMIT $limit' : ''}
+    ${query.offset ? 'OFFSET $offset' : ''}
   `;
-}
 
 export const buildRepository = decorateWithRecordList(({ resource }) => {
   const count = (connection, filter) => {
     const query = sql`
       SELECT count(*) as count
       FROM ${resource}
-      ${queryToSql(filter)};
+      ${filterToSql(filter)};
     `;
 
     return connection.query({ text: query })
       .then(result => parseInt(result.rows[0].count, 10));
   }
 
-  const where = async (connection, filter = {}, options = {}) => {
-    // TODO: fix SQL Injection in where and order
-    const query = sql`
+  const where = async (connection, filter = {}) => {
+    const statement = sql`
       SELECT *
       FROM ${resource}
-      ${queryToSql(filter)}
+      ${filterToSql(filter)}
       ${orderToSql(filter)}
       ${paginationToSql(filter)};
     `;
 
-    return connection.query({ text: query })
+    return connection.query(prepareQuery({ statement, values: filter }))
       .then((result) => result.rows);
   };
 
@@ -99,43 +96,40 @@ export const buildRepository = decorateWithRecordList(({ resource }) => {
     const chunks = recordAsArray.map(({ index }) => `$${index + 1}`);
     const values = recordAsArray.map(({ value }) => value);
 
-    const query = sql`
+    const statement = sql`
       INSERT INTO ${resource} (${columns.join(', ')})
       VALUES (${chunks.join(',')})
       RETURNING *;
     `;
 
-    return connection.query({ text: query, values })
+    return connection.query({ text: statement, values })
       .then(result => result.rows[0]);
   };
 
   const update = (connection, filter, record = {}) => {
     if (isEmpty(record)) return where(connection, filter);
+    const chunks = Object.keys(record).map((key) => `${key}=$${key}`);
 
-    const recordAsArray = toKeyValueArray(record);
-    const chunks = recordAsArray.map(({ key, index }) => `${key}=$${index + 1}`);
-    const values = recordAsArray.map(({ value }) => value);
-
-    const query = sql`
+    const statement = sql`
       UPDATE ${resource}
       SET ${chunks.join(', ')}
-      ${queryToSql(filter)}
+      ${filterToSql(filter)}
       RETURNING *;
     `;
 
-    return connection.query({ values, text: query })
+    return connection.query(prepareQuery({ statement, values: { ...filter, ...record } }))
       .then(result => result.rows);
   };
 
   const destroy = (connection, filter) => {
-    const query = sql`
+    const statement = sql`
       DELETE
       FROM ${resource}
-      ${queryToSql(filter)}
+      ${filterToSql(filter)}
       RETURNING *;
     `;
 
-    return connection.query({ text: query })
+    return connection.query(prepareQuery({ statement, values: filter }))
       .then(result => result.rows);
   };
 
