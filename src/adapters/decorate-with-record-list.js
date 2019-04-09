@@ -6,17 +6,17 @@ const decorateWithRecordList = (buildReporitoryFn) => (...args) => {
   return {
     ...repository,
 
-    update: (...args) => repository.update(...args)
-      .then((records) => toRecordList(records, { total: records.length })),
+    update: (connection, query, record) => repository.update(connection, query, record)
+      .then((records) => toRecordList(records, { total: records.length, limit: (query || {}).limit, offset: (query || {}).offset })),
 
-    destroy: (...args) => repository.destroy(...args)
-      .then((records) => toRecordList(records, { total: records.length })),
+    destroy: (connection, query) => repository.destroy(connection, query)
+      .then((records) => toRecordList(records, { total: records.length, limit: (query || {}).limit, offset: (query || {}).offset })),
 
-    where: (connection, query = {}) => Promise.all([
+    where: (connection, query) => Promise.all([
       repository.where(connection, query),
-      repository.count(connection, {}),
+      repository.count(connection, { ...query, limit: void 0, offset: 0 }),
     ]).then(([records, total]) => {
-      return toRecordList(records, { total, limit: query.limit, offset: query.offset })
+      return toRecordList(records, { total, limit: (query || {}).limit, offset: (query || {}).offset })
     })
   }
 };
