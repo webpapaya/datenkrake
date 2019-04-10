@@ -12,3 +12,4 @@
 - and/or in where clause
 - query memoization in inmemory adapter
 - memoize selectors
+- in memory joins
