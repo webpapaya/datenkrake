@@ -1,3 +1,4 @@
+import memoize from 'fast-memoize';
 import {
   equals as rEquals,
   where as rWhere,
