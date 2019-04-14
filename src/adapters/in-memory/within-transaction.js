@@ -1,13 +1,5 @@
-import { rethrowError, ignoreReturnFor } from 'promise-frites';
-import { buildConnection, releaseConnection } from './connection';
-
-const withinConnection = (con, fn) => {
-  const connection = con || buildConnection();
-  return Promise.resolve()
-    .then(() => fn({ connection }))
-    .then((ignoreReturnFor(() => releaseConnection(connection))))
-    .catch((rethrowError(() => releaseConnection(connection))));
-};
+import { rethrowError } from 'promise-frites';
+import { withinConnection } from './connection';
 
 const withinTransaction = (connectionOrFn, fnOrUndefined) => {
   const connectionGiven = !!fnOrUndefined;

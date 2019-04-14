@@ -1,3 +1,4 @@
+import { rethrowError, ignoreReturnFor } from 'promise-frites';
 import { Pool } from 'pg';
 
 const pool = new Pool({
@@ -13,3 +14,12 @@ const pool = new Pool({
 
 export const buildConnection = () => pool.connect();
 export const releaseConnection = connection => connection.release();
+export const withinConnection = (con, fn) => {
+  let connection;
+  return Promise.resolve()
+    .then(() => con || buildConnection())
+    .then((c) => { connection = c; })
+    .then(() => fn({ connection }))
+    .then((ignoreReturnFor(() => releaseConnection(connection))))
+    .catch((rethrowError(() => releaseConnection(connection))));
+};

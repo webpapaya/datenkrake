@@ -16,6 +16,7 @@ import {
 } from '../operators';
 import * as inMemory from './in-memory';
 import * as postgres from './postgres';
+import * as postgrest from './postgrest';
 
 const assertDifference = async (fn, countFn, difference) => {
   const before = await countFn();
@@ -24,7 +25,7 @@ const assertDifference = async (fn, countFn, difference) => {
 };
 
 [
-  { name: 'inMemory', adapter: inMemory, setup: () => {} },
+  { name: 'inMemory', adapter: inMemory, setup: () => {}, teardown: () => {} },
   {
     name: 'postgres',
     adapter: postgres,
@@ -34,8 +35,23 @@ const assertDifference = async (fn, countFn, difference) => {
             text     text
         );
     `),
+    teardown: () => {}
   },
-].forEach(({ name, adapter, setup }) => {
+  // {
+  //   name: 'postgrest',
+  //   adapter: postgrest,
+  //   setup: async ({ connection }) => {
+  //     postgres.buildConnection
+  //     connection.query(`
+  //       create table users (
+  //           property integer,
+  //           text     text
+  //       );
+  //   `)
+  //   },
+  //   teardown: () => {}
+  // },
+].forEach(({ name, adapter, setup, teardown }) => {
   describe(name, () => {
     const { buildRepository, withinTransaction } = adapter;
     const repository = buildRepository({ resource: 'users' });
@@ -47,6 +63,7 @@ const assertDifference = async (fn, countFn, difference) => {
         throw e;
       } finally {
         await rollback();
+        await teardown();
       }
     });
 

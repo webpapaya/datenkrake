@@ -142,5 +142,5 @@ export const buildRepository = decorateWithRecordList(({ resource }) => {
   };
 });
 
-export { buildConnection, releaseConnection } from './connection';
+export { buildConnection, releaseConnection, withinConnection } from './connection';
 export { default as withinTransaction } from './within-transaction';
