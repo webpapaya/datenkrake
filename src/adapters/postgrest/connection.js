@@ -1,19 +1,23 @@
 import { rethrowError, ignoreReturnFor } from 'promise-frites';
-import { Pool } from 'pg';
+import axios from 'axios';
 
-const pool = new Pool({
-  host: 'localhost',
-  user: 'dbuser',
-  password: 'password',
-  database: 'compup',
-  port: 5432,
-  max: 20,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
+const noop = () => ({});
+export const buildConnection = ({ baseURL = 'http://localhost:3000' } = {}) => axios.create({
+  baseURL,
+  headers: {
+    'Content-Type': 'application/json',
+    Prefer: 'return=representation,count=exact',
+  },
 });
+export const releaseConnection = noop;
 
-export const buildConnection = () => pool.connect();
-export const releaseConnection = connection => connection.release();
+export const setAuthentication = (connection, token) => {
+  connection.defaults.headers.Authorization = token // eslint-disable-line no-param-reassign
+    ? `Bearer ${token}`
+    : null;
+};
+
+export const unsetAuthentication = connection => setAuthentication(connection, null);
 export const withinConnection = (connectionOrFn, fnOrUndefined) => {
   const connectionGiven = !!fnOrUndefined;
   const fn = connectionGiven ? fnOrUndefined : connectionOrFn;

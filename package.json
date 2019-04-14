@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "lint": "eslint src/",
-    "test": "docker-compose up -d && mocha --compilers js:@babel/register $(find . -name '*.spec.js' -not -path './node_modules/*')"
+    "test": "docker-compose up -d && mocha --compilers js:@babel/register $(find . -name '*.spec.js' -not -path './node_modules/*') --timeout 10000"
   },
   "author": "Thomas Mayrhofer",
   "license": "ISC",

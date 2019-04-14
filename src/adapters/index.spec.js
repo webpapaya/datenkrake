@@ -9,6 +9,7 @@ import {
   hasProperties,
   everyItem,
 } from 'hamjest';
+import { execSync } from 'child_process'
 
 import { q, where, order, limit, offset } from '../query-builder';
 import {
@@ -37,20 +38,29 @@ const assertDifference = async (fn, countFn, difference) => {
     `),
     teardown: () => {}
   },
-  // {
-  //   name: 'postgrest',
-  //   adapter: postgrest,
-  //   setup: async ({ connection }) => {
-  //     postgres.buildConnection
-  //     connection.query(`
-  //       create table users (
-  //           property integer,
-  //           text     text
-  //       );
-  //   `)
-  //   },
-  //   teardown: () => {}
-  // },
+  {
+    name: 'postgrest',
+    adapter: postgrest,
+    setup: async () => {
+      await postgres.withinConnection(({ connection }) => {
+        return connection.query(`
+          create table users (
+              property integer,
+              text     text
+          );
+        `)
+      });
+
+      await postgrest.withinConnection(async({ connection }) => Promise.resolve()
+        .then(() => connection.get('/'))
+        .then((response) => !response.data.paths['/users'])
+        .then((needsToRestart) => needsToRestart && execSync('docker-compose restart server')));
+
+    },
+    teardown: () => postgres.withinConnection(({ connection }) => {
+      return connection.query('drop table users;')
+    }),
+  },
 ].forEach(({ name, adapter, setup, teardown }) => {
   describe(name, () => {
     const { buildRepository, withinTransaction } = adapter;
@@ -311,7 +321,7 @@ const assertDifference = async (fn, countFn, difference) => {
         });
 
         describe('desc', () => {
-          it('nulls are first by default', t(async ({ connection }) => {
+          it.skip('nulls are first by default', t(async ({ connection }) => {
             await setupRecords(connection, records);
             assertThat(await repository.where(connection, q(order(desc('property')))),
               contains(records[1], records[0], records[2]));
