@@ -9,9 +9,11 @@ import {
   hasProperties,
   everyItem,
 } from 'hamjest';
-import { execSync } from 'child_process'
+import { execSync } from 'child_process';
 
-import { q, where, order, limit, offset } from '../query-builder';
+import {
+  q, where, order, limit, offset,
+} from '../query-builder';
 import {
   eq, gt, gte, lt, lte, oneOf, like, not, asc, desc,
 } from '../operators';
@@ -26,7 +28,9 @@ const assertDifference = async (fn, countFn, difference) => {
 };
 
 [
-  { name: 'inMemory', adapter: inMemory, setup: () => {}, teardown: () => {} },
+  {
+    name: 'inMemory', adapter: inMemory, setup: () => {}, teardown: () => {},
+  },
   {
     name: 'postgres',
     adapter: postgres,
@@ -36,32 +40,29 @@ const assertDifference = async (fn, countFn, difference) => {
             text     text
         );
     `),
-    teardown: () => {}
+    teardown: () => {},
   },
   {
     name: 'postgrest',
     adapter: postgrest,
     setup: async () => {
-      await postgres.withinConnection(({ connection }) => {
-        return connection.query(`
+      await postgres.withinConnection(({ connection }) => connection.query(`
           create table users (
               property integer,
               text     text
           );
-        `)
-      });
+        `));
 
-      await postgrest.withinConnection(async({ connection }) => Promise.resolve()
+      await postgrest.withinConnection(async ({ connection }) => Promise.resolve()
         .then(() => connection.get('/'))
-        .then((response) => !response.data.paths['/users'])
-        .then((needsToRestart) => needsToRestart && execSync('docker-compose restart server')));
-
+        .then(response => !response.data.paths['/users'])
+        .then(needsToRestart => needsToRestart && execSync('docker-compose restart server')));
     },
-    teardown: () => postgres.withinConnection(({ connection }) => {
-      return connection.query('drop table users;')
-    }),
+    teardown: () => postgres.withinConnection(({ connection }) => connection.query('drop table users;')),
   },
-].forEach(({ name, adapter, setup, teardown }) => {
+].forEach(({
+  name, adapter, setup, teardown,
+}) => {
   describe(name, () => {
     const { buildRepository, withinTransaction } = adapter;
     const repository = buildRepository({ resource: 'users' });

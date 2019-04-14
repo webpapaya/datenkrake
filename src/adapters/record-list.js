@@ -7,8 +7,6 @@ class RecordList extends Array {
   }
 }
 
-export const toRecordList = (items, options) => {
-  return new RecordList(items, options);
-}
+export const toRecordList = (items, options) => new RecordList(items, options);
 
 export default toRecordList;

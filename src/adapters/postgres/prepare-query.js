@@ -14,6 +14,6 @@ const prepareQuery = ({ statement, values }) => {
   }, statement);
 
   return { text: oneLine(prepared), values: valuesToReturn };
-}
+};
 
 export default prepareQuery;

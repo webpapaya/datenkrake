@@ -75,7 +75,7 @@ export const buildRepository = decorateWithRecordList(({ resource }) => {
 
     return connection.query({ text: query })
       .then(result => parseInt(result.rows[0].count, 10));
-  }
+  };
 
   const where = async (connection, filter = {}) => {
     const statement = sql`
@@ -87,7 +87,7 @@ export const buildRepository = decorateWithRecordList(({ resource }) => {
     `;
 
     return connection.query(prepareQuery({ statement, values: filter }))
-      .then((result) => result.rows);
+      .then(result => result.rows);
   };
 
   const create = (connection, record) => {
@@ -108,7 +108,7 @@ export const buildRepository = decorateWithRecordList(({ resource }) => {
 
   const update = (connection, filter, record = {}) => {
     if (isEmpty(record)) return where(connection, filter);
-    const chunks = Object.keys(record).map((key) => `${key}=$${key}`);
+    const chunks = Object.keys(record).map(key => `${key}=$${key}`);
 
     const statement = sql`
       UPDATE ${resource}

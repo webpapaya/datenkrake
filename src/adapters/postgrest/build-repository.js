@@ -4,7 +4,7 @@ import decamelize from 'decamelize';
 import buildQueryParams from './to-query-params';
 import decorateWithRecordList from '../decorate-with-record-list';
 
-const REQUESTED_RANGE_NOT_SATISFIABLE = 416
+const REQUESTED_RANGE_NOT_SATISFIABLE = 416;
 
 const requiredParam = (name) => { throw Error(`${name} is a required parameter`); };
 const parseContentRange = (contentRange) => {
@@ -17,7 +17,7 @@ const parseContentRange = (contentRange) => {
   };
 };
 
-const parseTotal = (response) =>
+const parseTotal = response =>
   parseContentRange(response.headers['content-range']).total;
 
 const buildRepository = decorateWithRecordList(({
@@ -28,7 +28,7 @@ const buildRepository = decorateWithRecordList(({
 
   const create = (connection, values) => Promise.resolve()
     .then(() => connection.post(url, decamelCaseKeys(values)))
-    .then((response) => camelCaseKeys(response.data[0]));
+    .then(response => camelCaseKeys(response.data[0]));
 
   const where = (connection, filter = {}) => {
     const hasPaginationOverwritten = filter.limit !== undefined || filter.offset !== undefined;
@@ -37,7 +37,7 @@ const buildRepository = decorateWithRecordList(({
 
     return Promise.resolve()
       .then(() => connection.get(`${url}?${queryString}`, { headers }))
-      .then((response) => camelCaseKeys(response.data))
+      .then(response => camelCaseKeys(response.data))
       .catch((result) => {
         if (result.response.status === REQUESTED_RANGE_NOT_SATISFIABLE) {
           return [];
@@ -48,16 +48,15 @@ const buildRepository = decorateWithRecordList(({
 
   const update = (connection, filter, values = {}) => Promise.resolve()
     .then(() => connection.patch(`${url}?${buildQueryParams(filter)}`, decamelCaseKeys(values)))
-    .then((response) => camelCaseKeys(response.data))
-    .catch((x) => console.log(x));
+    .then(response => camelCaseKeys(response.data));
 
   const destroy = (connection, filter) => Promise.resolve()
     .then(() => connection.delete(`${url}?${buildQueryParams(filter)}`))
-    .then((response) => camelCaseKeys(response.data));
+    .then(response => camelCaseKeys(response.data));
 
-  const count = (connection, filter={}) => Promise.resolve()
-    .then(() => connection.get(`${url}?${buildQueryParams({...filter, limit: 1})}`))
-    .then((response) => parseTotal(response));
+  const count = (connection, filter = {}) => Promise.resolve()
+    .then(() => connection.get(`${url}?${buildQueryParams({ ...filter, limit: 1 })}`))
+    .then(response => parseTotal(response));
 
   return {
     create,
