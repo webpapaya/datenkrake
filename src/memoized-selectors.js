@@ -1,8 +1,13 @@
 import memoize from 'fast-memoize';
+import { pathOr } from 'ramda';
 import { filterByQuery, findByQuery } from './selectors';
+const EMPTY_ARRAY = [];
 
 const memoizeWithCacheBuster = fn => memoize(fn, {
-  serializer: ([query, records]) => [JSON.stringify(query), records],
+  serializer: ([query, records, options]) => {
+    const scopedRecords = pathOr([], options.path, records);
+    return [JSON.stringify(query), scopedRecords];
+  },
   cache: {
     create() {
       let store = {};
@@ -14,7 +19,6 @@ const memoizeWithCacheBuster = fn => memoize(fn, {
           if (store.records !== records) {
             store = {};
           }
-
           return store[query];
         },
         set([query, records], value) {
@@ -26,5 +30,18 @@ const memoizeWithCacheBuster = fn => memoize(fn, {
   },
 });
 
-export const createFilterByQuery = () => memoizeWithCacheBuster(filterByQuery);
-export const createFindByQuery = () => memoizeWithCacheBuster(findByQuery);
+
+export const createFilterByQuery = ({ path = [] } = {}) => {
+  const cache = memoizeWithCacheBuster((query, records) =>
+    filterByQuery(query, pathOr([], path, records)));
+
+  return (query, records) => cache(query, records, { path });
+}
+
+
+export const createFindByQuery = ({ path = [] } = {}) => {
+  const cache = memoizeWithCacheBuster((query, records) =>
+    findByQuery(query, pathOr([], path, records)));
+
+  return (query, records) => cache(query, records, { path });
+}
