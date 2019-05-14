@@ -15,7 +15,7 @@ const records2 = [
   { id: 6 },
 ];
 
-describe.only('memoizedSelectors', () => {
+describe('memoizedSelectors', () => {
   it('return the same object with same query', () => {
     const filterByQuery = createFilterByQuery();
     const query = q({ id: gte(2) });
