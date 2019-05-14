@@ -5,6 +5,7 @@ class RecordList extends Array {
     this.limit = options.limit || items.length;
     this.offset = options.offset || 0;
   }
+
   static get [Symbol.species]() {
     return Array;
   }

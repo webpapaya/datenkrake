@@ -1,7 +1,5 @@
 import memoize from 'fast-memoize';
 import { pathOr } from 'ramda';
-import { filterByQuery, findByQuery } from './selectors';
-const EMPTY_ARRAY = [];
 
 const memoizeWithCacheBuster = fn => memoize(fn, {
   serializer: ([query, records, options]) => {
@@ -30,18 +28,4 @@ const memoizeWithCacheBuster = fn => memoize(fn, {
   },
 });
 
-
-export const createFilterByQuery = ({ path = [] } = {}) => {
-  const cache = memoizeWithCacheBuster((query, records) =>
-    filterByQuery(query, pathOr([], path, records)));
-
-  return (query, records) => cache(query, records, { path });
-}
-
-
-export const createFindByQuery = ({ path = [] } = {}) => {
-  const cache = memoizeWithCacheBuster((query, records) =>
-    findByQuery(query, pathOr([], path, records)));
-
-  return (query, records) => cache(query, records, { path });
-}
+export default memoizeWithCacheBuster;

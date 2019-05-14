@@ -16,7 +16,9 @@ import {
   flip,
   is,
   isNil,
+  pathOr,
 } from 'ramda';
+import memoizeWithCacheBuster from './memoize-with-cache-buster';
 
 export const FILTERS = {
   eq: rEquals,
@@ -85,5 +87,17 @@ export const findByQuery = (query, collection, defaultValue = {}) => {
   return filteredRecords[0] || defaultValue;
 };
 
-export { createFilterByQuery } from './memoized-selectors';
-export { createFindByQuery } from './memoized-selectors';
+export const createFilterByQuery = ({ path = [] } = {}) => {
+  const cache = memoizeWithCacheBuster((query, records) =>
+    filterByQuery(query, pathOr([], path, records)));
+
+  return (query, records) => cache(query, records, { path });
+};
+
+
+export const createFindByQuery = ({ path = [] } = {}) => {
+  const cache = memoizeWithCacheBuster((query, records) =>
+    findByQuery(query, pathOr([], path, records)));
+
+  return (query, records) => cache(query, records, { path });
+};

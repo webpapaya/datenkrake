@@ -1,5 +1,7 @@
-import { assertThat, strictlyEqualTo, not, equalTo } from 'hamjest';
-import { createFilterByQuery } from './memoized-selectors';
+import {
+  assertThat, strictlyEqualTo, not, equalTo,
+} from 'hamjest';
+import { createFilterByQuery } from './selectors';
 import { gte } from './operators';
 import { q } from './query-builder';
 
