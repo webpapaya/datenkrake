@@ -84,3 +84,6 @@ export const findByQuery = (query, collection, defaultValue = {}) => {
   const filteredRecords = filterByQuery(query, collection);
   return filteredRecords[0] || defaultValue;
 };
+
+export { createFilterByQuery } from './memoized-selectors';
+export { createFindByQuery } from './memoized-selectors';
